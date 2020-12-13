@@ -1,16 +1,7 @@
 /*****************************************************************************************
  * Bryan Roberts
- * CS344 - Fall 2020
+ * CS344 - Fall
  * Assignment 3: smallsh
- * Description: Smallsh implements a subset of features of well-known shells, such as bash.
- * Provide a prompt for running commands,
- * Handle blank lines and comments, which are lines beginning with the # character
- * Provide expansion for the variable $$
- * Execute 3 commands exit, cd, and status via code built into the shell
- * Execute other commands by creating new processes using a function from the exec family of functions
- * Support input and output redirection
- * Support running commands in foreground and background processes
- * Implement custom handlers for 2 signals, SIGINT and SIGTSTP
  ****************************************************************************************/
 
 #include <stdio.h>
@@ -43,14 +34,6 @@ struct prompt
     int comment;             // 0 - not a comment, 1 - comment
     int argCount;
 };
-
-/*****************************************************************************************
- * exit command 
- ****************************************************************************************/
-void exitCommand()
-{
-    exit(0);
-}
 
 /*****************************************************************************************
  * cd command no arguments 
@@ -259,6 +242,11 @@ void executeCommandForeground(struct prompt *prompt, int *status)
             statusCommand(*status, 1);
         }
 
+        for (int i = 0; i < prompt->argCount; i++)
+        {
+            free(args[i]);
+        }
+
         break;
     }
 }
@@ -407,6 +395,11 @@ void executeCommandBackground(struct prompt *prompt)
         fflush(stdout);
         spawnPid = waitpid(spawnPid, &status, WNOHANG);
 
+        for (int i = 0; i < prompt->argCount; i++)
+        {
+            free(args[i]);
+        }
+
         break;
     }
 }
@@ -419,6 +412,15 @@ struct prompt *parsePrompt(char *promptLine)
 {
 
     struct prompt *currPrompt = malloc(sizeof(struct prompt));
+
+    // initialize pointers to NULL
+    currPrompt->command = NULL;
+    currPrompt->inputFile = NULL;
+    currPrompt->outputFile = NULL;
+    for (int i = 0; i < 512; i++)
+    {
+        currPrompt->argument[i] = NULL;
+    }
 
     // set default values for backgroundExecution, comment, and argCount
     currPrompt->backgroundExecution = 0;
@@ -495,6 +497,32 @@ struct prompt *parsePrompt(char *promptLine)
     }
 
     return currPrompt;
+}
+
+/*****************************************************************************************
+ * free memory from malloc and calloc calls
+ ****************************************************************************************/
+void freeCurrentPrompt(struct prompt *currentPrompt)
+{
+    if (currentPrompt->command != NULL)
+    {
+        free(currentPrompt->command);
+    }
+    if (currentPrompt->inputFile != NULL)
+    {
+        free(currentPrompt->inputFile);
+    }
+    if (currentPrompt->outputFile != NULL)
+    {
+        free(currentPrompt->outputFile);
+    }
+    for (int i = 0; i < 512; i++)
+    {
+        if (currentPrompt->argument[i] != NULL)
+        {
+            free(currentPrompt->argument[i]);
+        }
+    }
 }
 
 /*****************************************************************************************
@@ -616,7 +644,8 @@ int main()
         // if exit - exit program
         else if (strcmp(currPrompt->command, "exit") == 0)
         {
-            exitCommand();
+            freeCurrentPrompt(currPrompt);
+            free(currPrompt);
             break;
         }
 
@@ -655,6 +684,9 @@ int main()
                 executeCommandForeground(currPrompt, &status);
             }
         }
+
+        freeCurrentPrompt(currPrompt);
+        free(currPrompt);
     }
 
     return 0;
