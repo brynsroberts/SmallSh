@@ -242,12 +242,12 @@ void executeCommandForeground(struct prompt *prompt, int *status)
             statusCommand(*status, 1);
         }
 
-        for (int i = 0; i < prompt->argCount; i++)
-        {
-            free(args[i]);
-        }
-
         break;
+    }
+
+    for (int i = 0; i < prompt->argCount + 2; i++)
+    {
+        free(args[i]);
     }
 }
 
@@ -395,12 +395,12 @@ void executeCommandBackground(struct prompt *prompt)
         fflush(stdout);
         spawnPid = waitpid(spawnPid, &status, WNOHANG);
 
-        for (int i = 0; i < prompt->argCount; i++)
-        {
-            free(args[i]);
-        }
-
         break;
+    }
+
+    for (int i = 0; i < prompt->argCount + 2; i++)
+    {
+        free(args[i]);
     }
 }
 
@@ -500,7 +500,7 @@ struct prompt *parsePrompt(char *promptLine)
 }
 
 /*****************************************************************************************
- * free memory from malloc and calloc calls
+ * checks background pids to see if they have finished executing 
  ****************************************************************************************/
 void freeCurrentPrompt(struct prompt *currentPrompt)
 {
@@ -615,14 +615,14 @@ int main()
         checkBackgroundProcesses();
 
         // create buffers for prompt
-        char promptBuffer[2048];   // will hold initial user input
-        char expandedPrompt[2048]; // will hold variable expanded input
+        char promptBuffer[2048] = {'\0'};   // will hold initial user input
+        char expandedPrompt[2048] = {'\0'}; // will hold variable expanded input
 
         // clear out expanded prompt before getting new input
-        for (int i = 0; i < 2048; i++)
-        {
-            expandedPrompt[i] = '\0';
-        }
+        //for (int i = 0; i < 2048; i++)
+        //{
+        //    expandedPrompt[i] = '\0';
+        //}
 
         // get command prompt and print it
         getCommandPrompt(promptBuffer, expandedPrompt);
