@@ -12,7 +12,7 @@ SmallSh will implement a subset of features of well-known shells, such as bash.
 * Implement custom handlers for 2 signals, SIGINT and SIGTSTP
 
 ## Compile
-    gcc --std=gnu99 -o smallsh smallsh.c
+    gcc --std=gnu99 -o smallsh main.c functions.c
 
 ## Run
     ./smallsh
