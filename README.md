@@ -1,6 +1,6 @@
-# SmallSh
+# small shell
 
-SmallSh will implement a subset of features of well-known shells, such as bash.
+small shell will implement a subset of features of well-known shells, such as bash.
 
 * Provide a prompt for running commands
 * Handle blank lines and comments, which are lines beginning with the # character
